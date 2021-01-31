@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>FPL data</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel='stylesheet' type='text/css' media='screen' href='public/main.css'>
+    <script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script src='public/main.js'></script>
+</head>
+
+<body>
+    <div id="loading-screen"></div>
+    <div id="page-content" class="hidden">
+        <div class="select-wrapper">
+            <select id="loadDataSelection">
+                <option disabled selected value> -- Select an option -- </option>
+                <option value="TeamWaitingForDraw">Team waiting for draw</option>
+                <option value="TeamWaitingForWin">Team waiting for win</option>
+            </select>
+        </div>
+        <div id="results-wrapper" class="results-wrapper"></div>
+    </div>
+
+
+    <script>
+
+        $(document).ready(function () {
+            let allData = null;
+            fetch('data').then(function (response) {
+                return response.json();
+            }).then(function (data) {
+                allData = data;
+                $('#loading-screen').addClass('hidden');
+                $('#page-content').removeClass('hidden');
+            }).catch(function (err) {
+                allData = null;
+            })
+
+
+            $('#loadDataSelection').on('change', function (e) {
+                e.preventDefault();
+                console.log($(this).val())
+                switch ($(this).val()) {
+                    case "TeamWaitingForDraw": {
+                        let teamWaitingForDrawData = teamWaitingForDraw(allData);
+                        let resultsHtml = `<div class="results-header"><div>Team</div><div>Games</div></div>`;
+                        teamWaitingForDrawData.forEach((team) => {
+                            resultsHtml += `<div class="results-row"><div>${team.name}</div><div>${team.gamesWithNoDraw}</div></div>`
+                        });
+                        $('#results-wrapper').html(resultsHtml);
+                        break;
+                    }
+                    case "TeamWaitingForWin": {
+                        let teamWaitingForWinData = teamWaitingForWin(allData);
+                        let resultsHtml = `<div class="results-header"><div>Team</div><div>Games</div></div>`;
+                        teamWaitingForWinData.forEach((team) => {
+                            resultsHtml += `<div class="results-row"><div>${team.name}</div><div>${team.gamesWithNoWin}</div></div>`
+                        });
+                        $('#results-wrapper').html(resultsHtml);
+                        break;
+                    }
+                }
+            })
+        });
+    </script>
+</body>
+
+</html>
